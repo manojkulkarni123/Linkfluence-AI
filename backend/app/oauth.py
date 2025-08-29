@@ -17,6 +17,7 @@ import httpx
 import asyncio
 from config import LINKEDIN_CLIENT_ID, LINKEDIN_CLIENT_SECRET, LINKEDIN_REDIRECT_URI
 from db import supabase
+from urllib.parse import urlencode
 
 router = APIRouter()
 
@@ -138,81 +139,23 @@ async def linkedin_callback(code: str):
             except Exception as db_error:
                 print(f"Database error: {db_error}")
                 # Continue anyway
-                
-            return {
-                "message": "LinkedIn login successful", 
+            
+            # Redirect to React frontend with user info
+            frontend_url = "http://localhost:3000"
+            params = {
                 "linkedin_id": linkedin_id,
                 "name": name,
                 "email": email
             }
+            redirect_url = f"{frontend_url}?{urlencode(params)}"
             
+            return RedirectResponse(url=redirect_url)
+                
     except (httpx.ConnectError, httpx.RemoteProtocolError) as e:
         print(f"Connection error: {e}")
-        # Fallback: try with requests as a last resort
-    #     try:
-    #         import requests
-    #         print("Falling back to requests library...")
-            
-    #         token_data = {
-    #             "grant_type": "authorization_code",
-    #             "code": code,
-    #             "redirect_uri": LINKEDIN_REDIRECT_URI,
-    #             "client_id": LINKEDIN_CLIENT_ID,
-    #             "client_secret": LINKEDIN_CLIENT_SECRET,
-    #         }
-            
-    #         headers = {"Content-Type": "application/x-www-form-urlencoded"}
-            
-    #         # Try with requests
-    #         session = requests.Session()
-    #         session.verify = False  # Disable SSL verification
-            
-    #         token_response = session.post(TOKEN_URL, data=token_data, headers=headers, timeout=30)
-    #         token_response.raise_for_status()
-    #         token_json = token_response.json()
-    #         access_token = token_json.get("access_token")
-            
-    #         if not access_token:
-    #             raise HTTPException(status_code=400, detail="No access token received")
-            
-    #         # Get profile with requests
-    #         profile_headers = {"Authorization": f"Bearer {access_token}"}
-    #         profile_response = session.get("https://api.linkedin.com/v2/userinfo", headers=profile_headers, timeout=30)
-    #         profile_response.raise_for_status()
-    #         profile = profile_response.json()
-            
-    #         linkedin_id = profile.get("sub")
-    #         name = profile.get("name", "")
-    #         email = profile.get("email", f"user_{profile.get('sub')}@linkedin.local")
-            
-    #         result = supabase.table("users").upsert({
-    #             "linkedin_id": linkedin_id,
-    #             "name": name,
-    #             "email": email,
-    #             "access_token": access_token
-    #         }, on_conflict="linkedin_id").execute()
-            
-    #         return {
-    #             "message": "LinkedIn login successful (via requests fallback)", 
-    #             "linkedin_id": linkedin_id,
-    #             "name": name,
-    #             "email": email
-    #         }
-            
-    #     except Exception as fallback_error:
-    #         print(f"Fallback also failed: {fallback_error}")
-    #         raise HTTPException(status_code=500, detail=f"All connection methods failed: {str(e)}")
+        # Redirect to frontend with error
+        return RedirectResponse(url="http://localhost:3000?error=connection_failed")
     
-    # except httpx.ConnectError as e:
-    #     print(f"Connection error: {e}")
-    #     raise HTTPException(status_code=500, detail="Failed to connect to LinkedIn. Check your internet connection.")
-    
-    # except httpx.TimeoutException as e:
-    #     print(f"Timeout error: {e}")
-    #     raise HTTPException(status_code=500, detail="LinkedIn request timed out. Please try again.")
-    
-    # except Exception as e:
-    #     print(f"Unexpected error: {e}")
-    #     raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
-
-
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+        return RedirectResponse(url="http://localhost:3000?error=auth_failed")
