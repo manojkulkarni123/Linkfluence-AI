@@ -7,7 +7,7 @@ A full-stack application that helps users generate and manage LinkedIn posts usi
 - OAuth2 authentication with LinkedIn
 - AI-powered post generation with customizable:
   - Length (short, medium, long)
-  - Tone (formal, casual, funny, professional)
+  - Structure and Goal
 - Media upload support
 - Post management system
 - Direct posting to LinkedIn
