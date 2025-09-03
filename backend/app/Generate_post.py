@@ -1,9 +1,9 @@
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
-from config import OPENAI_API_KEY
+from app.config import OPENAI_API_KEY
 import supabase
 from fastapi import HTTPException
-from db import supabase
+from app.db import supabase
 
 async def generate_post(user_id: str, text: str, length: str, note: str) -> dict:
     """

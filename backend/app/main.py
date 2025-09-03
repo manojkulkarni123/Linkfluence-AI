@@ -1,11 +1,11 @@
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI, File, HTTPException, UploadFile, Form
 from fastapi.middleware.cors import CORSMiddleware
-from oauth import router as oauth_router
-from linkedin import post_to_linkedin
+from app.oauth import router as oauth_router
+from app.linkedin import post_to_linkedin
 from typing import List, Literal, Optional
-from Generate_post import generate_post, store_generated_post
+from app.Generate_post import generate_post, store_generated_post
 import supabase
-from db import supabase
+from app.db import supabase
 
 app = FastAPI(title="LinkedIn Post Generator")
 
@@ -30,7 +30,9 @@ def read_root():
 async def upload_linkedin_post(
     user_id: str,
     post_id: str,
-    files: Optional[List[UploadFile]] = File(None)
+    files: Optional[List[UploadFile]] = File(None),
+    text: Optional[str] = Form(None)
+    ##changed form to accept text
 ):
     """Create a LinkedIn post with optional images."""
     try:
@@ -60,9 +62,11 @@ async def upload_linkedin_post(
              raise HTTPException(status_code=404, detail="Post not found")
              
         post_data = post.data[0]
+        ##added final_text here
+        final_text = text if text else post_data["generated_text"]
 
         # Create the post
-        result = await post_to_linkedin(user_id=post_data["user_id"], text=post_data["generated_text"], image_files=files)
+        result = await post_to_linkedin(user_id=post_data["user_id"], text=final_text, image_files=files)
 
         # Handle errors
         if "error" in result:
