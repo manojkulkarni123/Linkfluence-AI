@@ -28,6 +28,11 @@ app.include_router(oauth_router, tags=["auth"])
 def read_root():
     return {"message": "Welcome to LinkedIn Post Generator API"}
 
+@app.get("/health")
+def health_check():
+    return {"status": "ok"}         
+
+
 @app.post("/Post_to_linkedin/{post_id}")
 async def upload_linkedin_post(
     user_id: str,
