@@ -141,7 +141,7 @@ async def linkedin_callback(code: str):
                 # Continue anyway
             
             # Redirect to React frontend with user info
-            frontend_url = "http://localhost:3000"
+            frontend_url = "https://linkedin-post-generator-ue5d.vercel.app/"
             params = {
                 "linkedin_id": linkedin_id,
                 "name": name,
