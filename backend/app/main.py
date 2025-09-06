@@ -14,8 +14,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:4000",
                    "http://localhost:3000"
-                   "https://linkedin-post-generator-ue5d.vercel.app/",  # Add your frontend domain
-                   "https://*.onrender.com"],  # Frontend URL
+                    "https://linkedin-post-generator-ue5d.vercel.app",  # Your Vercel app
+                     "https://*.vercel.app" ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
