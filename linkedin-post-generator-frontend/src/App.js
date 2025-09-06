@@ -371,7 +371,7 @@ const App = () => {
               <Linkedin className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-white font-bold">LinkedIn Post Generator</h1>
+              <h1 className="text-white font-bold">Linkfluence-AI</h1>
               {userInfo && (
                 <p className="text-blue-200 text-sm">Welcome back, {userInfo.name}</p>
               )}
