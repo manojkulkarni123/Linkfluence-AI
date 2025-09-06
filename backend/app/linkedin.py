@@ -1,6 +1,6 @@
 import asyncio
 import httpx
-from app.db import supabase
+from db import supabase
 from fastapi import UploadFile, File, HTTPException
 from typing import List, Optional
 

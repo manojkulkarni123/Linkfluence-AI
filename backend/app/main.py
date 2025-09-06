@@ -1,11 +1,11 @@
 from fastapi import FastAPI, File, HTTPException, UploadFile, Form
 from fastapi.middleware.cors import CORSMiddleware
-from app.oauth import router as oauth_router
-from app.linkedin import post_to_linkedin
+from oauth import router as oauth_router
+from linkedin import post_to_linkedin
 from typing import List, Literal, Optional
-from app.Generate_post import generate_post, store_generated_post
+from Generate_post import generate_post, store_generated_post
 import supabase
-from app.db import supabase
+from db import supabase
 
 app = FastAPI(title="LinkedIn Post Generator")
 
@@ -111,3 +111,8 @@ async def create_post(user_id: str, text: str,   length: Literal["short", "mediu
         "generated_text": generated_result["generated_text"],
         "message": "Post generated and stored successfully"
     }
+
+
+if __name__== "__main__":
+    import uvicorn
+    uvicorn.run(app, host="127.0.0.1", port=4000)
