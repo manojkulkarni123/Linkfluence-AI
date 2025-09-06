@@ -1,7 +1,5 @@
-/* eslint-disable */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/*eslint-disable*/
+/* Tailwind directives removed or ensure Tailwind CSS is properly configured in your build process */
 
 body {
   margin: 0;
