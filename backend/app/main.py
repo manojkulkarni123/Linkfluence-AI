@@ -13,7 +13,9 @@ app = FastAPI(title="LinkedIn Post Generator")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:4000",
-                   "http://localhost:3000"],  # Frontend URL
+                   "http://localhost:3000"
+                   "https://your-frontend-domain.com",  # Add your frontend domain
+                   "https://*.onrender.com"],  # Frontend URL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
