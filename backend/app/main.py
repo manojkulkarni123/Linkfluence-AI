@@ -14,7 +14,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:4000",
                    "http://localhost:3000",
-                    "https://linkfluenceai.vercel.app/",  # Your Vercel app
+                    "https://linkfluenceai.vercel.app",  # Your Vercel app
                     ],
     allow_credentials=True,
     allow_methods=["*"],
