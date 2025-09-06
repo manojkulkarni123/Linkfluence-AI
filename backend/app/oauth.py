@@ -154,8 +154,8 @@ async def linkedin_callback(code: str):
     except (httpx.ConnectError, httpx.RemoteProtocolError) as e:
         print(f"Connection error: {e}")
         # Redirect to frontend with error
-        return RedirectResponse(url="http://localhost:3000?error=connection_failed")
+        return RedirectResponse(url="https://linkedin-post-generator-hbo2.onrender.com/?error=connection_failed")
     
     except Exception as e:
         print(f"Unexpected error: {e}")
-        return RedirectResponse(url="http://localhost:3000?error=auth_failed")
+        return RedirectResponse(url="https://linkedin-post-generator-hbo2.onrender.com/?error=auth_failed")
