@@ -33,7 +33,7 @@ const GeneratedPostPage = () => {
     });
     formDataObj.append('text', editablePost);
     try {
-      const response = await fetch(`${API_BASE_URL}/${postId}?user_id=${userInfo?.linkedin_id}`, {
+      const response = await fetch(`${API_BASE_URL}/Post_to_linkedin/${postId}?user_id=${userInfo?.linkedin_id}`, {
         method: 'POST',
         body: formDataObj,
       });
