@@ -13,6 +13,7 @@ const GeneratedPostPage = () => {
   const [editablePost, setEditablePost] = useState(generatedPost || '');
   const [isPosting, setIsPosting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [postPublished, setPostPublished] = useState(false);
 
   
   useEffect(() => {
@@ -31,17 +32,22 @@ const GeneratedPostPage = () => {
     });
     formDataObj.append('text', editablePost);
     try {
-      
       const response = await fetch(`http://localhost:4000/Post_to_linkedin/${postId}?user_id=${userInfo?.linkedin_id}`, {
         method: 'POST',
         body: formDataObj,
       });
       if (response.ok) {
+        setPostPublished(true);
         setShowSuccess(true);
-        
         setTimeout(() => {
           setShowSuccess(false);
-          navigate('/generate', { replace: true });
+          // Navigate with state to preserve the user session
+          navigate('/generate', {
+            state: { 
+              userInfo,
+              currentPage: 'generator' // This ensures we don't show landing page
+            }
+          });
         }, 3000);
       } else {
         console.error('Failed to post to LinkedIn');
@@ -163,10 +169,19 @@ const GeneratedPostPage = () => {
                 {/* Publish button block */}
                 <button
                   onClick={handlePostToLinkedIn}
-                  disabled={isPosting || isEditing}
-                  className="w-full py-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-2xl hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+                  disabled={isPosting || isEditing || postPublished}
+                  className={`w-full py-4 font-semibold rounded-2xl transition-all duration-300 flex items-center justify-center gap-3 ${
+                    postPublished 
+                      ? 'bg-green-500/20 border-2 border-green-500/50 text-green-400 cursor-not-allowed'
+                      : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:shadow-lg hover:shadow-blue-500/25 disabled:opacity-50 disabled:cursor-not-allowed'
+                  }`}
                 >
-                  {isPosting ? (
+                  {postPublished ? (
+                    <>
+                      <Check className="w-5 h-5" />
+                      Published Successfully!
+                    </>
+                  ) : isPosting ? (
                     <>
                       <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                       Publishing...
@@ -187,9 +202,9 @@ const GeneratedPostPage = () => {
       {/* Success modal block */}
       {showSuccess && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-8 rounded-3xl text-center animate-pulse">
+          <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-8 rounded-3xl text-center">
             <Check className="w-16 h-16 text-white mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-white mb-2">Posted Successfully! ��</h3>
+            <h3 className="text-2xl font-bold text-white mb-2">Posted Successfully!</h3>
             <p className="text-white/80">Your post is now live on LinkedIn</p>
           </div>
         </div>
@@ -199,10 +214,13 @@ const GeneratedPostPage = () => {
 };
 
 const App = () => {
-  const navigate = useNavigate();
-  const [currentPage, setCurrentPage] = useState('landing');
-  const [isConnected, setIsConnected] = useState(false);
-  const [userInfo, setUserInfo] = useState(null);
+  const navigate = useNavigate(); // Add this line
+  const location = useLocation();
+  const state = location.state || {};
+  
+  const [currentPage, setCurrentPage] = useState(state.currentPage || 'landing');
+  const [userInfo, setUserInfo] = useState(state.userInfo || null);
+  const [isConnected, setIsConnected] = useState(false); // Add this line
   const [formData, setFormData] = useState({
     topic: '',
     structure: '',
@@ -542,7 +560,7 @@ const App = () => {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-8 rounded-3xl text-center animate-pulse">
             <Check className="w-16 h-16 text-white mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-white mb-2">Posted Successfully! ��</h3>
+            <h3 className="text-2xl font-bold text-white mb-2">Posted Successfully!</h3>
             <p className="text-white/80">Your post is now live on LinkedIn</p>
           </div>
         </div>
