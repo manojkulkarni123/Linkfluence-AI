@@ -1,9 +1,10 @@
 from langchain_openai import ChatOpenAI
+from langchain_groq import ChatGroq
 from langchain.prompts import ChatPromptTemplate
-from app.config import OPENAI_API_KEY
+from config import OPENAI_API_KEY,GROQ_API_KEY
 import supabase
 from fastapi import HTTPException
-from app.db import supabase
+from db import supabase
 
 async def generate_post(user_id: str, text: str, length: str, note: str) -> dict:
     """
@@ -50,7 +51,7 @@ async def generate_post(user_id: str, text: str, length: str, note: str) -> dict
         - Always generate a ready-to-post LinkedIn text, formatted with proper line breaks.
         """
 
-        # Length guidelines
+      
     length_map = {
             "short": "under 200 words - quick and punchy",
             "medium": "200-300 words - balanced depth",
@@ -71,11 +72,9 @@ async def generate_post(user_id: str, text: str, length: str, note: str) -> dict
         """
 
     try:
-        # Generate the post
         response = await llm.ainvoke(prompt_template)
         
         generated_text=response.content.strip().replace('"', '')
-        # Return the content with proper formatting preserved
         return  {
             "generated_text":generated_text,
             "status":"success"
