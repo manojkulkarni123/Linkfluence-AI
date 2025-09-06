@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Upload, Wand2, Send, Linkedin, Sparkles, ArrowRight, Edit3, Check, X } from 'lucide-react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { API_BASE_URL } from './config';
 
 const GeneratedPostPage = () => {
   const navigate = useNavigate();
@@ -32,7 +33,7 @@ const GeneratedPostPage = () => {
     });
     formDataObj.append('text', editablePost);
     try {
-      const response = await fetch(`http://localhost:4000/Post_to_linkedin/${postId}?user_id=${userInfo?.linkedin_id}`, {
+      const response = await fetch(`${API_BASE_URL}/${postId}?user_id=${userInfo?.linkedin_id}`, {
         method: 'POST',
         body: formDataObj,
       });
@@ -250,7 +251,7 @@ const App = () => {
   }, []);
 
   const handleLinkedInConnect = () => {
-    window.location.href = 'http://localhost:4000/auth/linkedin';
+    window.location.href = `${API_BASE_URL}/auth/linkedin`;
   };
 
   
@@ -273,7 +274,7 @@ const App = () => {
     setCurrentStep(4);
 
     try {
-      const response = await fetch(`http://localhost:4000/create_post/?user_id=${userInfo?.linkedin_id}&text=${encodeURIComponent(formData.topic)}&length=${formData.length}&note=${encodeURIComponent(formData.structure)}`, {
+      const response = await fetch(`${API_BASE_URL}/create_post/?user_id=${userInfo?.linkedin_id}&text=${encodeURIComponent(formData.topic)}&length=${formData.length}&note=${encodeURIComponent(formData.structure)}`, {
         method: 'GET',
       });
 
