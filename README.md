@@ -1,4 +1,4 @@
-# LinkedIn Post Generator 📱
+# Linkfluence-AI📱
 
 A full-stack application that helps users generate and manage LinkedIn posts using AI, with direct LinkedIn integration for posting.
 
