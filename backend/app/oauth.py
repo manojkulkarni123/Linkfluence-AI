@@ -17,7 +17,8 @@ import httpx
 import asyncio
 from config import LINKEDIN_CLIENT_ID, LINKEDIN_CLIENT_SECRET, LINKEDIN_REDIRECT_URI
 from db import supabase
-from urllib.parse import urlencode
+import base64
+import json
 
 router = APIRouter()
 
@@ -44,11 +45,10 @@ async def linkedin_callback(code: str):
         limits = httpx.Limits(max_keepalive_connections=5, max_connections=10)
         
         async with httpx.AsyncClient(
-            verify=False, 
-            timeout=timeout, 
+            timeout=timeout,
             limits=limits,
-            http2=False,  
-            follow_redirects=True
+            http2=False,
+            follow_redirects=True,
         ) as client:
             # Exchange code for access token
             token_data = {
@@ -140,16 +140,25 @@ async def linkedin_callback(code: str):
                 print(f"Database error: {db_error}")
                 # Continue anyway
             
-            # Redirect to React frontend with user info
+            # Redirect to React frontend with short-lived session cookie (avoid PII in URL)
             frontend_url = "https://linkfluenceai.vercel.app/"
-            params = {
+            session_payload = {
                 "linkedin_id": linkedin_id,
                 "name": name,
                 "email": email
             }
-            redirect_url = f"{frontend_url}?{urlencode(params)}"
+            encoded_payload = base64.urlsafe_b64encode(
+                json.dumps(session_payload).encode("utf-8")
+            ).decode("utf-8")
+            response = RedirectResponse(url=frontend_url)
+            response.set_cookie(
+                key="lf_user",
+                value=encoded_payload,
+                max_age=300,
+                samesite="lax",
+            )
             
-            return RedirectResponse(url=redirect_url)
+            return response
                 
     except (httpx.ConnectError, httpx.RemoteProtocolError) as e:
         print(f"Connection error: {e}")
