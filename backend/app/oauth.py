@@ -43,8 +43,7 @@ async def linkedin_callback(code: str):
         timeout = httpx.Timeout(30.0)
         limits = httpx.Limits(max_keepalive_connections=5, max_connections=10)
         
-        async with httpx.AsyncClient(
-            verify=False, 
+        async with httpx.AsyncClient( 
             timeout=timeout, 
             limits=limits,
             http2=False,  
