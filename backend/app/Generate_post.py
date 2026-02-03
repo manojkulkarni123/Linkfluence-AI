@@ -55,13 +55,17 @@ async def generate_post(user_id: str, text: str, length: str, note: str) -> dict
             "long": "300-500 words - detailed with story"
         }
 
+    length_description = length_map.get(length)
+    if not length_description:
+        raise HTTPException(status_code=400, detail="Invalid length value")
+
         # Dynamic prompt template
     prompt_template = f"""
         {system_prompt}
 
         Topic: {text}
         Desired structure and end goal: {note}
-        Length: {length_map[length]}
+        Length: {length_description}
 
         Output:
         A compelling LinkedIn post that adapts dynamically to the given structure and goal. 
@@ -78,10 +82,7 @@ async def generate_post(user_id: str, text: str, length: str, note: str) -> dict
         }
     
     except Exception as e:
-       return {
-            "error": str(e),
-            "status": "failed"
-        }
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 async def store_generated_post(

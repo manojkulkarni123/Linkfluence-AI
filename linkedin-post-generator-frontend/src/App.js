@@ -15,6 +15,7 @@ const GeneratedPostPage = () => {
   const [isPosting, setIsPosting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [postPublished, setPostPublished] = useState(false);
+  const [previewUrls, setPreviewUrls] = useState([]);
 
   
   useEffect(() => {
@@ -22,6 +23,26 @@ const GeneratedPostPage = () => {
       navigate('/generate', { replace: true });
     }
   }, [generatedPost, navigate]);
+
+  useEffect(() => {
+    if (!files || files.length === 0) {
+      setPreviewUrls([]);
+      return;
+    }
+
+    const nextUrls = files.map((file) => (
+      typeof file === 'string' ? file : URL.createObjectURL(file)
+    ));
+    setPreviewUrls(nextUrls);
+
+    return () => {
+      nextUrls.forEach((url, index) => {
+        if (files[index] && typeof files[index] !== 'string') {
+          URL.revokeObjectURL(url);
+        }
+      });
+    };
+  }, [files]);
 
 
   const handlePostToLinkedIn = async () => {
@@ -150,14 +171,14 @@ const GeneratedPostPage = () => {
                 </div>
 
                 {/* Uploaded Images Preview block */}
-                {files && files.length > 0 && (
+                {previewUrls.length > 0 && (
                   <div className="mt-6">
                     <h3 className="text-white font-semibold mb-2">Images to be uploaded:</h3>
                     <div className="flex flex-wrap gap-4">
-                      {files.map((file, idx) => (
+                      {previewUrls.map((url, idx) => (
                         <div key={idx} className="w-24 h-24 rounded-xl overflow-hidden border border-blue-500/20">
                           <img
-                            src={typeof file === 'string' ? file : URL.createObjectURL(file)}
+                            src={url}
                             alt={`preview-${idx}`}
                             className="object-cover w-full h-full"
                           />
@@ -218,6 +239,22 @@ const App = () => {
   const navigate = useNavigate(); // Add this line
   const location = useLocation();
   const state = location.state || {};
+
+  const getCookie = (name) => {
+    const match = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
+    return match ? match[2] : null;
+  };
+
+  const decodeSession = (value) => {
+    if (!value) return null;
+    try {
+      const normalized = value.replace(/-/g, '+').replace(/_/g, '/');
+      const decoded = atob(normalized);
+      return JSON.parse(decoded);
+    } catch {
+      return null;
+    }
+  };
   
   const [currentPage, setCurrentPage] = useState(state.currentPage || 'landing');
   const [userInfo, setUserInfo] = useState(state.userInfo || null);
@@ -236,6 +273,7 @@ const App = () => {
   const [postId, setPostId] = useState(null);
   const [currentStep, setCurrentStep] = useState(1);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [filePreviewUrls, setFilePreviewUrls] = useState([]);
 
   // Check if user is already connected
   useEffect(() => {
@@ -244,11 +282,45 @@ const App = () => {
     const name = urlParams.get('name');
     
     if (linkedinId && name) {
+      const updatedUserInfo = { linkedin_id: linkedinId, name: decodeURIComponent(name) };
       setIsConnected(true);
-      setUserInfo({ linkedin_id: linkedinId, name: decodeURIComponent(name) });
+      setUserInfo(updatedUserInfo);
+      setCurrentPage('generator');
+      localStorage.setItem('lf_user', JSON.stringify(updatedUserInfo));
+      return;
+    }
+
+    const cookieUser = decodeSession(getCookie('lf_user'));
+    if (cookieUser?.linkedin_id) {
+      setIsConnected(true);
+      setUserInfo(cookieUser);
+      setCurrentPage('generator');
+      localStorage.setItem('lf_user', JSON.stringify(cookieUser));
+      return;
+    }
+
+    const storedUser = localStorage.getItem('lf_user');
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      setIsConnected(true);
+      setUserInfo(parsedUser);
       setCurrentPage('generator');
     }
   }, []);
+
+  useEffect(() => {
+    if (formData.files.length === 0) {
+      setFilePreviewUrls([]);
+      return;
+    }
+
+    const nextUrls = formData.files.map((file) => URL.createObjectURL(file));
+    setFilePreviewUrls(nextUrls);
+
+    return () => {
+      nextUrls.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [formData.files]);
 
   const handleLinkedInConnect = () => {
     window.location.href = `${API_BASE_URL}/auth/linkedin`;
@@ -508,12 +580,12 @@ const App = () => {
             </div>
 
             {/* Image Previews */}
-            {formData.files.length > 0 && (
+            {filePreviewUrls.length > 0 && (
               <div className="flex flex-wrap gap-4 mt-6">
-                {formData.files.map((file, idx) => (
+                {filePreviewUrls.map((url, idx) => (
                   <div key={idx} className="relative group w-24 h-24 rounded-xl overflow-hidden border border-blue-500/20">
                     <img
-                      src={URL.createObjectURL(file)}
+                      src={url}
                       alt={`preview-${idx}`}
                       className="object-cover w-full h-full"
                     />
