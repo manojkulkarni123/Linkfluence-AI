@@ -1,8 +1,5 @@
 from langchain_openai import ChatOpenAI
-from langchain_groq import ChatGroq
-from langchain.prompts import ChatPromptTemplate
-from config import OPENAI_API_KEY,GROQ_API_KEY
-import supabase
+from config import OPENAI_API_KEY
 from fastapi import HTTPException
 from db import supabase
 

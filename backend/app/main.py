@@ -4,8 +4,8 @@ from oauth import router as oauth_router
 from linkedin import post_to_linkedin
 from typing import List, Literal, Optional
 from Generate_post import generate_post, store_generated_post
-import supabase
 from db import supabase
+from pydantic import BaseModel, Field
 
 app = FastAPI(title="LinkedIn Post Generator")
 
@@ -23,6 +23,12 @@ app.add_middleware(
 
 # Include the OAuth router
 app.include_router(oauth_router, tags=["auth"])
+
+class CreatePostRequest(BaseModel):
+    user_id: str = Field(..., min_length=1)
+    text: str = Field(..., min_length=1)
+    length: Literal["short", "medium", "long"]
+    note: str = Field(..., min_length=1)
 
 @app.get("/")
 def read_root():
@@ -99,18 +105,28 @@ async def upload_linkedin_post(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
     
-@app.get("/create_post/")
-async def create_post(user_id: str, text: str,   length: Literal["short", "medium", "long"], note:str):
+@app.post("/create_post/")
+async def create_post(request: CreatePostRequest):
+    generated_result = await generate_post(
+        user_id=request.user_id,
+        text=request.text,
+        length=request.length,
+        note=request.note,
+    )
 
-    generated_result = await generate_post(user_id=user_id, text=text,length=length,note=note)
+    if generated_result.get("status") != "success":
+        raise HTTPException(
+            status_code=500,
+            detail=generated_result.get("error", "Failed to generate post"),
+        )
         
     
     stored_post = await store_generated_post(
-        user_id=user_id,
+        user_id=request.user_id,
         generated_text=generated_result["generated_text"],
-        original_text=text,
-        length=length,
-        note=note
+        original_text=request.text,
+        length=request.length,
+        note=request.note,
     )
     
     return {

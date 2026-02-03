@@ -274,8 +274,15 @@ const App = () => {
     setCurrentStep(4);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/create_post/?user_id=${userInfo?.linkedin_id}&text=${encodeURIComponent(formData.topic)}&length=${formData.length}&note=${encodeURIComponent(formData.structure)}`, {
-        method: 'GET',
+      const response = await fetch(`${API_BASE_URL}/create_post/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: userInfo?.linkedin_id,
+          text: formData.topic,
+          length: formData.length,
+          note: formData.structure,
+        }),
       });
 
       if (response.ok) {
